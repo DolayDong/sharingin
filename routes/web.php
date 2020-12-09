@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\App\HomeController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -22,9 +23,9 @@ Route::get('/', function () {
 })->name('login')->middleware('guest');
 Route::get('verifikasi_', [AuthController::class, 'verifikasi']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post("/pusher/auth", [UserController::class, 'authPusher']);
 
-Route::middleware('auth')->group(function(){
+Route::middleware('auth')->group(function () {
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('{any}', [HomeController::class, 'index'])->name('Home')->where('any', '^(?!api).*$');
 });
-

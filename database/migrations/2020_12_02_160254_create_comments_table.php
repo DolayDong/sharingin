@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLikesTable extends Migration
+class CreateCommentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateLikesTable extends Migration
      */
     public function up()
     {
-        Schema::create('likes', function (Blueprint $table) {
+        Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("postingan_id");
             $table->unsignedBigInteger("user_id");
-            $table->integer("disukai_pada");
-
+            $table->text("body");
+            $table->integer("dibuat");
 
             $table->foreign("postingan_id")->references("id")->on("postingans");
             $table->foreign("user_id")->references("id")->on("users");
@@ -32,6 +32,6 @@ class CreateLikesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('likes');
+        Schema::dropIfExists('comments');
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTemenTable extends Migration
+class CreateNotifikasiDetailsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class CreateTemenTable extends Migration
      */
     public function up()
     {
-        Schema::create('teman', function (Blueprint $table) {
+        Schema::create('notifikasi_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('teman_id');
-            $table->integer('berteman_pada');
+            $table->timestamps();
         });
     }
 
@@ -28,6 +26,6 @@ class CreateTemenTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('temen');
+        Schema::dropIfExists('notifikasi_details');
     }
 }

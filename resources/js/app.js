@@ -49,6 +49,13 @@ Vue.component('button-share-component', require('./components/HelperComponent/Bu
 Vue.component('button-add-teman-kecil', require('./components/HelperComponent/ButtonAddTemanKecil.vue').default);
 Vue.component('button-tema-component', require('./components/HelperComponent/ButtonTemaComponent.vue').default);
 Vue.component('button-add-teman-sedang', require('./components/HelperComponent/ButtonAddTemanSedang.vue').default);
+Vue.component('form-komentar', require('./components/HelperComponent/FormComentar.vue').default);
+Vue.component('contact-component', require('./components/PesanPage/ContactComponent.vue').default);
+Vue.component('pesan-component', require('./components/PesanPage/PesanComponent.vue').default);
+Vue.component('video-call-component', require('./components/HelperComponent/VideoCallComponent.vue').default);
+
+
+
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

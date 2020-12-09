@@ -14,9 +14,11 @@
         "bootstrap": "^4.0.0",
         "cross-env": "^7.0",
         "jquery": "^3.2",
+        "laravel-echo": "^1.9.0",
         "laravel-mix": "^5.0.1",
         "lodash": "^4.17.19",
         "popper.js": "^1.12",
+        "pusher-js": "^7.0.2",
         "resolve-url-loader": "^3.1.2",
         "sass": "^1.20.1",
         "sass-loader": "^8.0.0",
@@ -24,6 +26,8 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
+        "getusermedia": "^2.0.1",
+        "simple-peer": "^9.9.3",
         "vue-router": "^3.4.9",
         "vue-toast-notification": "^0.6.0"
     }

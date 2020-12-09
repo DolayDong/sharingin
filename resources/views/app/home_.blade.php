@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <base href="{{url('/')}}">
 
-    <script>
-        if(typeof Storage !== undefined){
-            const data = {!! $userdata !!};
+    <script type="text/javascript">
+        if (typeof Storage !== undefined) {
+            var data = <?php echo json_encode($userdata) ?>;
+
             console.log(data);
             sessionStorage.setItem("__user", JSON.stringify(data));
         }
-        
     </script>
+
     <title>Home</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -25,12 +27,14 @@
             left: -400px;
 
         }
+
         .__background__app__2 {
             position: fixed;
             top: 0;
             opacity: 0.01;
             z-index: -999;
         }
+
         .__background__app__3 {
             position: fixed;
             top: 10%;
@@ -38,11 +42,11 @@
             z-index: -999;
             opacity: .1;
         }
- 
     </style>
 
-<link rel="stylesheet" href="{{url('/css/style.shareaja.css')}}">
+    <link rel="stylesheet" href="{{url('/css/style.shareaja.css')}}">
 </head>
+
 <body>
     <div id="app">
         <home-component />
@@ -54,13 +58,14 @@
     <img src="{{asset('images/background-app/background-2.jpg')}}" alt="Background Modern" class="__background__app__2">
     <img src="{{asset('images/background-app/background-3.jpg')}}" alt="Background Modern 3" class="__background__app__3">
     <script src="{{asset('/js/app.js')}}"></script>
-<script>
-
-    if(typeof Storage !== undefined){
-        const tema = new Vue({
-                el: '#tema'
-            });
-    }
+    <script>
+        // if (typeof Storage !== undefined) {
+        //     const tema = new Vue({
+        //         el: '#tema'
+        //     });
+        // }
     </script>
+
 </body>
+
 </html>

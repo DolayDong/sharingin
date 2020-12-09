@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Helper;
+use App\Models\Like;
+use App\Models\Notifikasi;
 use App\Models\Postingan;
 use App\Models\PostinganDetail;
 use App\Models\Teman;
@@ -10,13 +13,14 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use SebastianBergmann\Environment\Console;
 
 class PostinganController extends Controller
 {
 
     public function postingan_teman(Request $request)
     {
-        if($request->header("API_TOKEN")){
+        if ($request->header("API_TOKEN")) {
             // return User::query()->where(
             //     'api_token', '=', $request->header('API_TOKEN')
             //     )->with(
@@ -35,26 +39,25 @@ class PostinganController extends Controller
             // }])->get();
 
             $user = User::query()->where("api_token", "=", $request->header("API_TOKEN"))->get()->first();
-            $temans = Teman::with(["postingans" => function($query){
-                $query->with(["postinganDetail", "user" => function($query){
+            $temans = Teman::with(["postingans" => function ($query) {
+                $query->reorder("diunggah", "desc")->with(["postinganDetail", "user" => function ($query) {
                     $query->with("data");
-                }]);
+                }, "likes", "comments"]);
             }])->where("user_id", "=", $user->id)->get();
 
 
-            if($temans){
+            if ($temans) {
                 foreach ($temans as $kunci => $teman) {
                     foreach ($teman->postingans as $key => $postingan) {
                         $postingan->url_media = urlencode($postingan->url_media);
                     }
                 }
             }
-            return $temans;
 
+            return $temans;
         } else {
             return response()->json(["pesan" => "endi tokene rek?"], 401);
         }
-        
     }
     public function post_(Request $request)
     {
@@ -67,8 +70,7 @@ class PostinganController extends Controller
                 $url = implode("/", $arrTmp);
 
                 if (Storage::delete("public/" . $url)) {
-                    $namaBaru = base64_encode(random_bytes(16)) . "." . $request->file("gambar-post")->extension();
-                    $namaBaru = str_replace("/", "S", $namaBaru);
+                    $namaBaru = time() . "_." . $request->file("gambar-post")->extension();
                     $path = $request->file("gambar-post")->storeAs("/public/images/posts", $namaBaru);
                     // $request->file("gambar-post")->move(public_path('images/posts'), $namaBaru);
 
@@ -111,8 +113,7 @@ class PostinganController extends Controller
                 $url = implode("/", $arrTmp);
 
                 if (Storage::delete("public/" . $url)) {
-                    $namaBaru = base64_encode(random_bytes(16)) . "." . $request->file("video-post")->extension();
-                    $namaBaru = str_replace("/", "S", $namaBaru);
+                    $namaBaru = time() . "_." . $request->file("video-post")->extension();
                     $path = $request->file("video-post")->storeAs("/public/videos/posts", $namaBaru);
                     // $request->file("gambar-post")->move(public_path('videos/posts'), $namaBaru);
 
@@ -146,7 +147,6 @@ class PostinganController extends Controller
                     }
                 } else {
                     return response()->json(["pesan" => "ga ada temporarry"], 500);
-          
                 }
             } else if ($request->post("__type") === "status") {
                 $postingan = Postingan::query()->create([
@@ -167,11 +167,65 @@ class PostinganController extends Controller
                     if ($detailPostingan->save()) {
                         return response()->json(["message" => "Berhasil"], 200);
                     }
-
-            } else {
-                return response()->json(["pesan" => "mohon maaf, sedang ada gangguan pada server"], 500);
+                } else {
+                    return response()->json(["pesan" => "mohon maaf, sedang ada gangguan pada server"], 500);
+                }
             }
         }
     }
-}
+
+    public function like(Postingan $postingan)
+    {
+        if (request()->header("API_KEY")) {
+            $like = Like::query()->create([
+                "postingan_id" => $postingan->id,
+                "user_id" => request()->post("idGw"),
+                "disukai_pada" => time()
+            ]);
+
+            if ($like->save()) {
+                $user = User::query()->where("id", "=", $postingan->user_id)->get()->first();
+                // type 0 untuk like
+                $notifikasiLike = Helper::inputNotifikasi($postingan, 0, request()->post("idGw"));
+
+                if ($notifikasiLike->save()) {
+
+                    return response()->json(["pesan" => "anda menambahkan like pada postingan", "user" => $user->name]);
+                }
+            } else {
+                return response()->json(["pesan" => "server error"], 500);
+            }
+        } else {
+            return response()->json(["pesan" => "endi tokenne rwk?"], 400);
+        }
+    }
+
+    public function dislike(Postingan $postingan)
+    {
+        if (request()->header("API_KEY")) {
+            $like = Like::query()->where("postingan_id", "=", $postingan->id);
+
+            if ($like->delete()) {
+                return response()->json(["pesan" => "anda tidak menyukai postingan ", "user" => User::query()->where("id", "=", $postingan->user_id)->get("name")->first()]);
+            } else {
+                return response()->json(["pesan" => "server error"], 500);
+            }
+        } else {
+            return response()->json(["pesan" => "endi tokenne rwk?"], 400);
+        }
+    }
+
+    public function detail_post(Postingan $postingan)
+    {
+        $postingan = $postingan->with(["postinganDetail", "user" => function ($q) {
+            $q->with("data");
+        }, "likes" => function ($q) {
+            $q->get();
+        }])->where("id", "=", $postingan->id)->first();
+
+
+        $postingan->user->data->photo_profile = Helper::encodeUrl($postingan->user->data->photo_profile);
+
+        return response()->json($postingan);
+    }
 }

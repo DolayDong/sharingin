@@ -43,42 +43,55 @@ class User extends Authenticatable
      * @var array
      */
 
-     public function data()
-     {
+    public function data()
+    {
         return $this->hasOne(UsersData::class);
-     }
+    }
 
-     public function postingans()
-     {
+    public function postingans()
+    {
         return $this->hasMany(Postingan::class, "user_id", "id");
-     }
+    }
 
-     public function temans()
-     {
-         return $this->hasMany(Teman::class);
-     }
+    public function temans()
+    {
+        return $this->hasMany(Teman::class);
+    }
 
-     public function teman()
-     {
-         return $this->hasOne(Teman::class,'teman_id', 'id')->where('user_id', '=', Auth::id());
-     }
-     public function tambahTeman(User $user)
-     {
-         if($this->temans()->where('teman_id', '=', $user->id)->first()){
-             return NULL;
-         }
+    public function teman()
+    {
+        return $this->hasOne(Teman::class, 'teman_id', 'id')->where('user_id', '=', Auth::id());
+    }
+    public function tambahTeman(User $user)
+    {
+        if ($this->temans()->where('teman_id', '=', $user->id)->first()) {
+            return NULL;
+        }
 
-         return $this->temans()->save(new Teman([
-             'user_id' => Auth::id(),
-             'teman_id' => $user->id,
-             'berteman_pada' => time()
-         ]));
-     }
+        return $this->temans()->save(new Teman([
+            'user_id' => Auth::id(),
+            'teman_id' => $user->id,
+            'berteman_pada' => time()
+        ]));
+    }
 
-     public function berteman()
-     {
+    public function berteman()
+    {
         return Teman::query()->where('user_id', '=', Auth::id())->where('teman_id', '=', $this->id)->first();
-     }
+    }
 
+    public function like()
+    {
+        return $this->hasOne(Like::class, "id", "user_id");
+    }
 
+    public function notifications()
+    {
+        return $this->hasMany(Notifikasi::class, "kepada", "id");
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, "id", "user_id");
+    }
 }

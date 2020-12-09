@@ -13,6 +13,6 @@ class PostinganDetail extends Model
 
     public function detail()
     {
-        return $this->belongsTo(Postingan::class);
+        return $this->belongsTo(Postingan::class, "id", "postingan_id");
     }
 }

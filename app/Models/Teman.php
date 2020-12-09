@@ -16,7 +16,7 @@ class Teman extends Model
 
     public function teman()
     {
-        return $this->hasOne(User::class, 'user_id', 'id');
+        return $this->hasOne(User::class, 'id', 'teman_id');
     }
 
     public function user()
@@ -38,5 +38,4 @@ class Teman extends Model
     {
         return $this->hasMany(Postingan::class, "user_id", "teman_id");
     }
-
 }
