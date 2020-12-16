@@ -28,8 +28,7 @@ export default {
     },
   },
   mounted() {
-    console.log("contact component mounted");
-    console.log(this.temans)
+
   },
   data() {
     return {
@@ -41,7 +40,6 @@ export default {
     immediate: true,
     deep: true,
     temans: async function(databaru, datalama) {
-      console.log(datalama);
       this.datas = databaru;
     },
   },

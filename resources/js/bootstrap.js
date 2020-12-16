@@ -22,7 +22,8 @@ try {
 window.axios = require('axios');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-window.BASE_APP = "http://localhost:8000/";
+
+
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
@@ -33,9 +34,7 @@ window.BASE_APP = "http://localhost:8000/";
 import Echo from 'laravel-echo';
 
 window.Pusher = require('pusher-js');
-window.Peer = require('simple-peer');
 
-let Peer = window.Peer;
 
 window.Echo = new Echo({
     broadcaster: 'pusher',

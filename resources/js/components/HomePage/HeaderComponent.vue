@@ -53,6 +53,11 @@ export default {
     this.getJumlahNotifikasi();
     this.$root.$on('updatejumlahnotifikasi', this.updatejumlahnotifikasi)
   },
+  watch: {
+    jumlahnotifikasi(data){
+      this.jumlahnotifikasi = data;
+    }
+  },
   methods: {
     updatejumlahnotifikasi(data){
       this.jumlahnotifikasi = data;

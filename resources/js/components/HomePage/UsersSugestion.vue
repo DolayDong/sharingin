@@ -27,8 +27,11 @@
                         </ul>
                     </div>
                 </div>
-                <div class="card-footer" v-on:click="pindahUsers">
+                <div class="card-footer" v-on:click="pindahUsers" v-if="users.length !== 0">
                     <p>Lihat lebih banyak...</p>
+                </div>
+                <div style="margin-top: 10px; padding: 10px;" v-else>
+                    <h3>Belom ada user mendaftar</h3>
                 </div>
             </div>
         </div>
@@ -38,7 +41,6 @@
 import ButtonAddTemanKecil from '../HelperComponent/ButtonAddTemanKecil.vue';
 export default {
   components: { ButtonAddTemanKecil },
-    props: ["dataUser"],
     data() {
         return {
             userData: {},

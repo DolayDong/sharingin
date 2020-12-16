@@ -53,7 +53,7 @@ Vue.component('form-komentar', require('./components/HelperComponent/FormComenta
 Vue.component('contact-component', require('./components/PesanPage/ContactComponent.vue').default);
 Vue.component('pesan-component', require('./components/PesanPage/PesanComponent.vue').default);
 Vue.component('video-call-component', require('./components/HelperComponent/VideoCallComponent.vue').default);
-
+Vue.component('call-component', require('./components/HelperComponent/CallComponent.vue').default);
 
 
 

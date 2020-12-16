@@ -9,23 +9,39 @@
       <div class="modal__cont__">
         <div class="__body__modal">
           <div class="container__video">
-            <video class="video__gw" ref="video__gw"></video>
-            <video
-              class="video__teman"
-              ref="video__teman"
-              :muted="muted"
-            ></video>
+            <video class="video__gw" ref="video__gw" autoplay></video>
+            <video class="video__teman" ref="video__teman" autoplay></video>
           </div>
         </div>
-        <div class="__modal__footer">Footer Modal</div>
+        <div class="__modal__footer">
+          <div class="container__button__vc">
+            <button>
+              <h3
+                v-show="pemanggil"
+                class="tolak__vcall"
+                v-on:click.prevent="batalCall"
+              >
+                <i class="fa fa-video-camera fa-2x" aria-hidden="true"> Tolak</i>
+              </h3>
+            </button>
+             <h3
+                v-show="!pemanggil"
+                class="tolak__vcall"
+                v-on:click.prevent="batalCall"
+              >
+                <i class="fa fa-video-camera fa-2x" aria-hidden="true"> Akhiri</i>
+              </h3>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import MediaHandler from "../../MediaHandler.js";
 const APP_KEY = "4c08e21f32b2ed3689f9";
+import Peer from "simple-peer";
 
 export default {
   props: {
@@ -35,8 +51,10 @@ export default {
     },
   },
   mounted() {
-    this.dataGw.stream = null;
-    this.setupPusher();
+    // this.stream = null;
+    // this.temanStream.stream = null;
+    // this.setupPusher();
+    this.setupVc();
   },
   data() {
     return {
@@ -44,48 +62,69 @@ export default {
       tersedia: false,
       dataGw: JSON.parse(sessionStorage.getItem("__user")),
       idTeman: null,
-      stream: null,
       muted: true,
       peers: { userId: {} },
+      pemanggil: false,
+      streamTeman: undefined,
+      stream: null,
+      channel: null,
     };
   },
   watch: {
     teman(data) {
       this.teman = data;
     },
+    streamTeman(data) {
+      this.streamTeman = data;
+    },
+  },
+  async mediaRemote() {
+    const streamMedia = await this.mintaAkses();
+    console.log(streamMedia);
   },
   methods: {
-    vc() {
-      console.log(this.mintaAkses());
-      this.mintaAkses().then((stream) => {
-        this.stream = stream;
-        this.tersedia = true;
-        try {
-          this.$refs.video__gw.srcObject = stream;
-        } catch (error) {
-          this.$refs.video__gw.src = URL.createObjectURL(stream);
-        }
-        this.$refs.video__gw.play();
-        this.tampil = !this.tampil;
-        this.vcallKe(this.teman);
-      }).catch(error => {
-        console.log(error);
+    batalCall: function () {
+      this.stream.getTracks().forEach((track) => {
+        track.stop();
+        this.stream.removeTrack(track);
+        this.tampil = false;
       });
     },
-    vcallKe(teman) {
-      this.peers[teman.teman_id] = this.startPeer(teman.teman_id);
-    },
-    terimaPanggilan() {
-      let terima = false;
-    },
-    mintaAkses() {
-      return new Promise((resolve, reject) => {
-        navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: true
-        }).then(strem => {
-          resolve(strem);
+    vc() {
+      this.mintaAkses()
+        .then((stream) => {
+          this.stream = stream;
+
+          this.tersedia = true;
+          try {
+            this.$refs.video__gw.srcObject = stream;
+          } catch (error) {
+            this.$refs.video__gw.src = URL.createObjectURL(stream);
+          }
+          this.$refs.video__gw.play();
+          this.tampil = !this.tampil;
         })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          this.vcallKe(this.teman.teman_id, this.dataGw.name);
+        });
+    },
+    vcallKe(userId, nama) {
+      this.pemanggil = true;
+      this.peers[userId] = this.mulaiPanggilan(userId, true, nama);
+    },
+    mintaAkses: async () => {
+      return await new Promise((resolve, reject) => {
+        navigator.mediaDevices
+          .getUserMedia({
+            audio: true,
+            video: true,
+          })
+          .then((strem) => {
+            resolve(strem);
+          })
           .catch((error) => {
             throw new Error(
               `Harap mengaktifkan ijin untuk akses media anda:  Error : ${error}`
@@ -93,8 +132,47 @@ export default {
           });
       });
     },
+    setupVc() {
+      const pusher = this.setupPusher();
+      this.channel = pusher.subscribe("presence-video-channel");
+      this.channel.bind(`client-signal-${this.dataGw.id}`, async (signal) => {
+        var peer = this.peers[signal.userId];
+
+        if (peer === undefined) {
+          let panggilanMasuk = confirm(`${signal.nama} memanggil`);
+
+          if (panggilanMasuk) {
+            const media = async() => {
+              return await navigator.mediaDevices
+                .getUserMedia({ video: true, audio: true })
+                .then((stream) => {
+                  this.stream = stream
+                  console.log(this)
+                  if ("srcObject" in this.$refs.video__gw) {
+                    this.$refs.video__gw.srcObject = stream;
+                  } else {
+                    this.$refs.video__gw.src = window.URL.createObjectURL(
+                      stream
+                    ); // for older browsers
+                  }
+
+                });
+            };
+
+            const data = await media()
+            peer = this.mulaiPanggilan(signal.userId, false);
+              
+            this.tampil = !this.tampil;
+            // this.pemanggil = !pemanggil;
+
+          
+          }
+        }
+      peer.signal(signal.data);
+      });
+    },
     setupPusher() {
-      this.pusher = new Pusher(APP_KEY, {
+      return new Pusher(APP_KEY, {
         authEndpoint: "/pusher/auth",
         cluster: "ap4",
         auth: {
@@ -106,51 +184,38 @@ export default {
           },
         },
       });
-
-      this.channel = this.pusher.subscribe("presence-video-channel");
-      this.channel.bind(`client-signal-${this.dataGw.id}`, (signal) => {
-        let peer = this.peers[signal.userId];
-
-        let panggilanMasuk = confirm(`${signal.name} memanggil`);
-
-
-        // jika ga ada peer, berarti tersedia
-        if (peer === undefined) {
-          if(panggilanMasuk){
-            
-            this.idTeman = signal.userId;
-            this.tampil = !this.tampil;
-  
-            peer = this.startPeer(signal.userId, false);
-          }
-        }
-        peer.signal(signal.data);
-      });
     },
-    startPeer(user, initiator = true) {
+    mulaiPanggilan(userId, initiator = true, nama) {
       const peer = new Peer({
         initiator,
         stream: this.stream,
         trickle: false,
       });
-
-      peer.on("signal", (data) => {
-        this.channel.trigger(`client-signal-${user.id}`, {
-          type: "signal",
-          userId: this.dataGw.id,
-          data: data,
-          name: user.name
-        });
-      });
+      console.log(peer);
 
       peer.on("stream", (stream) => {
+        console.log("stream_________________________********************* 😊");
         if ("srcObject" in this.$refs.video__teman) {
           this.$refs.video__teman.srcObject = stream;
         } else {
-          alert("gada src object");
           this.$refs.video__teman.src = window.URL.createObjectURL(stream); // for older browsers
         }
-        this.$refs.video__teman.play();
+        // this.$refs.video__teman.play();
+        window.alert("on stream");
+      });
+      peer.on("signal", (data) => {
+        console.log(data);
+        // memberi sinyal bahwa ada panggilan masuk
+        this.channel.trigger(`client-signal-${userId}`, {
+          type: "signal",
+          userId: this.dataGw.id,
+          nama: nama,
+          data: data,
+        });
+      });
+
+      peer.on("connect", () => {
+        alert("connect");
       });
 
       peer.on("close", () => {
@@ -259,5 +324,18 @@ video.video__gw {
 }
 video.video__teman {
   width: 100%;
+}
+
+.vc__icon {
+  color: #fc4803a8;
+  list-style: none;
+}
+
+.tolak__vcall {
+  border-radius: 5px;
+    color: white;
+    width: 60px;
+    border: 1px solid white;
+    background-color: rgba(255, 0, 0, 0.8);
 }
 </style>

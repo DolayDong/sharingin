@@ -73,7 +73,6 @@ export default {
   },
   mounted() {
     this.getDataNotifikasi();
-    this.getJumlahNotifikasi();
   },
   methods: {
     getDataNotifikasi() {
@@ -110,7 +109,6 @@ export default {
       return waktu;
     },
     detailPostingan(id) {
-        this.$root.$emit('updatejumlahnotifikasi', this.jumlahnotifikasi);
 
       axios.post('/api/notifikasi/update_notifikasi/' + id, {}, {
         headers: {
@@ -119,7 +117,9 @@ export default {
         }
       }).then(response => {
         if(response.status === 200){
+          this.getJumlahNotifikasi();
           return this.$router.push({ name: "DetailPost", params: { idPost: id } });
+
         }
       }).catch(error => {
         alert("gagal update notifikasi")
@@ -131,7 +131,8 @@ export default {
           api_token: this.gw.api_token
         }
       }).then(response => {
-        this.jumlahnotifikasi = response.data.length;
+      this.$root.$emit('updatejumlahnotifikasi', response.data.length);
+
       })
     }
   },

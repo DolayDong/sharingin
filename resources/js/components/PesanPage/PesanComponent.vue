@@ -11,9 +11,7 @@
             }}
           </h1>
         </li>
-        <li class="call__icon" v-show="teman">
-          <i class="fa fa-phone fa-2x" aria-hidden="true"></i>
-        </li>
+        <call-component :teman="teman" />
         <video-call-component :teman="teman" />
       </ul>
     </div>
@@ -25,11 +23,12 @@
 import PesanFooterComponent from "./PesanFooterComponent.vue";
 import PesanBodyComponent from "./PesanBodyComponent.vue";
 import VideoCallComponent from "../HelperComponent/VideoCallComponent.vue";
+import CallComponent from '../HelperComponent/CallComponent.vue';
 export default {
-  components: { PesanBodyComponent, PesanFooterComponent, VideoCallComponent },
+  components: { PesanBodyComponent, PesanFooterComponent, VideoCallComponent, CallComponent },
   data() {
     return {
-      dataGw: JSON.parse(sessionStorage.getItem("__user")),
+            dataGw: JSON.parse(sessionStorage.getItem("__user")),
     };
   },
   props: {
@@ -43,7 +42,6 @@ export default {
     },
   },
   mounted() {
-    console.log("pesan component mounted");
   },
   methods: {
     kirimPesan(text) {
@@ -67,7 +65,6 @@ export default {
         )
         .then((response) => {
           this.$emit("baru", response.data);
-          console.log(response);
         })
         .catch((error) => {
           console.log(error);

@@ -43,8 +43,8 @@
           </small>
           <small v-else> 巴科特·拉赫·阿什 </small>
         </div>
-        <div class="card-footer">
-          <a href="#"><i class="fa fa-pencil fa-lg" aria-hidden="true"></i></a>
+        <div class="card-footer" v-on:click.stop="editProfileData">
+          <a href="#" v-on:click.prevent="editProfileData"><i class="fa fa-pencil fa-lg" aria-hidden="true"></i></a>
         </div>
       </div>
     </div>
@@ -302,6 +302,9 @@ export default {
         halamanPesan() {
       this.$router.push({ path: "/pesan", name: "pesan" });
     },
+    editProfileData(){
+
+    }
 
   },
 };
